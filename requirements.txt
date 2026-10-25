@@ -1,0 +1,10 @@
+nba_api
+pandas
+numpy
+scikit-learn
+xgboost
+streamlit
+plotly
+matplotlib
+seaborn
+jupyter
