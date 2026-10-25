@@ -32,12 +32,12 @@ Risk tiers (colors):
     probabilities only range ~1-4%, so every player would get the same color.
 
 Visual style:
-    NBA-inspired dark theme. Two layers:
-      * .streamlit/config.toml: native theme (colors, font, dataframe
-        header). Needed because dataframes are drawn on a canvas that CSS
-        can't style.
-      * inject_css() below: banner, metric cards, sidebar border, alert
-        box, heading typography.
+    Light theme modeled on nba.com's design system (cotton background, white
+    cards, black nav strip, navy/scarlet accents, Barlow Condensed headings,
+    Roboto body). Two layers:
+      * .streamlit/config.toml: native theme (colors, font, table header).
+        Needed because dataframes are drawn on a canvas that CSS can't style.
+      * CSS below: nav strip, page headers, cards, badges, sidebar, alert box.
     Unofficial portfolio project, not affiliated with the NBA.
 """
 
@@ -62,31 +62,31 @@ CALIBRATION_PNG = PROJECT_ROOT / "dashboard" / "calibration.png"
 
 SIDEBAR_NOTE = "Predictions cover Feb–Apr 2023 test period. Model trained on 2022-23 regular season."
 
-# NBA-inspired palette.
-NBA_BLUE = "#1D428A"        # Pantone 282C
-NBA_RED = "#C8102E"         # Pantone 193C
-AMBER = "#F5A623"
-GOLD = "#C9A84C"            # sparing highlight
-BACKGROUND = "#0A0A0A"
-SURFACE = "#1A1A1A"
-SURFACE_BORDER = "#2A2A2A"
-TEXT_PRIMARY = "#FFFFFF"
-TEXT_SECONDARY = "#A0A0A0"
-TEXT_MUTED = "#666666"
-FONT = "Barlow Condensed, Inter, sans-serif"
+# nba.com design tokens (names follow nba.com's CSS variables).
+NAVY = "#1d428a"          # --nba-navy, primary blue
+SCARLET = "#c8102e"       # --nba-scarlet, primary red
+DARK_BLUE = "#0b1b2c"     # --nba-dark-blue, headings / table headers
+COTTON = "#f6f6f6"        # --cotton, page background
+WHITE = "#ffffff"         # --white, cards
+NAV_SURFACE = "#191c23"   # --surface, dark nav surface
+MINOTAUR = "#222222"      # --minotaur, body text
+QUICK_SILVER = "#a4a2a2"  # --quick-silver, muted text
+CONCRETE = "#e7e7e7"      # --concrete, borders and dividers
+MAIZE = "#fbc64b"         # --maize-crayola, gold accent
+BLACK = "#000000"
+HEADING_FONT = "'Barlow Condensed', 'Roboto', arial, sans-serif"
+BODY_FONT = "'Roboto', arial, sans-serif"
 
 # Tier labels and colors. Every tier also has a text label, so color is
 # never the only cue.
 TIER_LABELS = {"green": "Low", "orange": "Elevated", "red": "High"}
-TIER_COLORS = {"High": NBA_RED, "Elevated": AMBER, "Low": NBA_BLUE}
-# Badge text color per tier: dark text on amber (white would be unreadable),
-# white on red and blue.
-TIER_TEXT_COLORS = {"High": TEXT_PRIMARY, "Elevated": BACKGROUND, "Low": TEXT_PRIMARY}
+TIER_COLORS = {"High": SCARLET, "Elevated": MAIZE, "Low": NAVY}
+TIER_TEXT_COLORS = {"High": WHITE, "Elevated": DARK_BLUE, "Low": WHITE}
 TIER_ORDER = ["High", "Elevated", "Low"]
-BACK_TO_BACK_COLOR = NBA_RED
-INJURY_MARK_COLOR = TEXT_PRIMARY
-LINE_COLOR = NBA_BLUE
-GUIDE_COLOR = TEXT_MUTED
+BACK_TO_BACK_COLOR = SCARLET
+INJURY_MARK_COLOR = BLACK
+LINE_COLOR = NAVY
+GUIDE_COLOR = CONCRETE
 
 # Columns joined from model_features.csv for context.
 CONTEXT_COLUMNS = [
@@ -139,134 +139,238 @@ def latest_per_player(df: pd.DataFrame) -> pd.DataFrame:
 # inline/emotion styles that would otherwise win.
 CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Barlow+Condensed:wght@600;700&display=swap');
 
-/* App background and base typography */
-.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
-    background-color: {BACKGROUND};
-}}
+/* ---- Base ---------------------------------------------------------------- */
+.stApp {{ background-color: {COTTON}; }}
 html, body, .stApp, .stMarkdown, [data-testid="stWidgetLabel"] {{
-    font-family: {FONT};
-    font-weight: 400;
+    font-family: {BODY_FONT};
+    color: {MINOTAUR};
 }}
-.stMarkdown p, .stMarkdown li {{ font-size: 1.05rem; font-weight: 500; }}
+.stMarkdown p, .stMarkdown li {{ font-size: 14px; font-weight: 400; line-height: 1.55; }}
+[data-testid="stCaptionContainer"] {{ color: {QUICK_SILVER}; font-size: 13px; }}
+hr {{ border: none !important; border-top: 1px solid {CONCRETE} !important; margin: 1.5rem 0 !important; }}
 
-/* Headings: bold, tracked, uppercase */
+/* Section titles (st.subheader): Barlow Condensed 700, uppercase, 18px */
 h1, h2, h3, h4 {{
-    font-family: {FONT} !important;
+    font-family: {HEADING_FONT} !important;
     font-weight: 700 !important;
-    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: {TEXT_PRIMARY};
+    letter-spacing: 0;
+    color: {DARK_BLUE} !important;
 }}
-[data-testid="stCaptionContainer"] {{ color: {TEXT_SECONDARY}; }}
+h3 {{ font-size: 18px !important; padding-top: 0.5rem !important; }}
 
-/* Sidebar */
+/* Sub-labels (widget labels, metric labels, custom .sub-label) */
+[data-testid="stWidgetLabel"] p, .sub-label {{
+    font-family: {BODY_FONT};
+    font-weight: 500 !important;
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: {QUICK_SILVER} !important;
+}}
+
+/* ---- Sidebar ------------------------------------------------------------- */
 [data-testid="stSidebar"] {{
-    background-color: #111111;
-    border-right: 1px solid {NBA_BLUE};
+    background-color: {WHITE};
+    border-left: 3px solid {NAVY};
+    border-right: 1px solid {CONCRETE};
 }}
+.sb-label {{
+    font-family: {BODY_FONT};
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: {QUICK_SILVER};
+    margin: 0.6rem 0 0.3rem;
+}}
+/* Nav items: Roboto 500 uppercase; selected = navy text with a left tick.
+   :has() only matches the checked item, so unselected items stay as-is. */
+[data-testid="stSidebar"] [data-testid="stRadio"] label {{
+    padding: 0.35rem 0.6rem;
+    border-left: 3px solid transparent;
+    margin-bottom: 2px;
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] label p {{
+    font-family: {BODY_FONT};
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: {MINOTAUR};
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {{
+    border-left-color: {NAVY};
+    background: {COTTON};
+}}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) p {{ color: {NAVY}; }}
 
-/* Header banner */
-.nba-banner {{
-    background: {SURFACE};
-    border-left: 6px solid {NBA_BLUE};
-    padding: 0.7rem 1.1rem;
-    margin-bottom: 1.2rem;
-    border-radius: 2px;
+/* Black nav strip with the wordmark, at the top of the sidebar */
+.nav-strip {{
+    background: {BLACK};
+    margin: -1rem -1rem 1rem -1rem;
+    padding: 1rem 1.2rem 0.9rem;
 }}
-.nba-banner span {{
-    font-family: {FONT};
+.nav-strip .wordmark {{
+    font-family: {HEADING_FONT};
     font-weight: 700;
-    font-size: 1.6rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: {TEXT_PRIMARY};
+    font-size: 44px;
+    line-height: 1;
 }}
-.nba-banner small {{
-    display: block;
-    color: {TEXT_SECONDARY};
-    font-family: {FONT};
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}}
-
-/* Metric cards: dark card with NBA blue accent. The value stays white:
-   blue text on #1A1A1A would only be 1.8:1 contrast. */
-[data-testid="stMetric"] {{
-    background: {SURFACE};
-    border: 1px solid {SURFACE_BORDER};
-    border-left: 4px solid {NBA_BLUE};
-    border-radius: 4px;
-    padding: 0.8rem 1rem;
-}}
-[data-testid="stMetric"]:hover {{ border-color: {SURFACE_BORDER}; border-left-color: {GOLD}; }}
-[data-testid="stMetricLabel"] {{
-    color: {TEXT_SECONDARY};
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}}
-[data-testid="stMetricValue"] {{
-    font-family: {FONT};
+.nav-strip .wordmark .n {{ color: {SCARLET}; }}
+.nav-strip .wordmark .b {{ color: {WHITE}; }}
+.nav-strip .wordmark .a {{ color: {NAVY}; }}
+.nav-strip .product {{
+    font-family: {HEADING_FONT};
     font-weight: 700;
-    color: {TEXT_PRIMARY};
+    font-size: 18px;
+    text-transform: uppercase;
+    color: {NAVY};
+    margin-top: 2px;
 }}
 
-/* Dataframes: frame and blue top rule (header color comes from config.toml) */
-[data-testid="stDataFrame"] {{
-    border: 1px solid {SURFACE_BORDER};
-    border-top: 2px solid {NBA_BLUE};
-    border-radius: 4px;
+/* ---- Page header (nba.com STATS-section style) --------------------------- */
+.page-header {{ margin: 0 0 1.4rem; }}
+.page-header .title {{
+    font-family: {HEADING_FONT};
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: {DARK_BLUE};
+}}
+.page-header .title .accent {{
+    border-bottom: 3px solid {SCARLET};
+    padding-bottom: 2px;
+}}
+.page-header .subtitle {{
+    font-family: {BODY_FONT};
+    font-weight: 400;
+    font-size: 14px;
+    color: {QUICK_SILVER};
+    margin-top: 0.6rem;
 }}
 
-/* Selectboxes and radio buttons: dark surface, blue focus border */
-[data-baseweb="select"] > div {{
-    background-color: {SURFACE};
-    border-color: {SURFACE_BORDER};
+/* ---- Cards: st.metric and the custom risk card --------------------------- */
+[data-testid="stMetric"], .risk-card {{
+    background: {WHITE};
+    border-top: 3px solid {NAVY};
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    padding: 0.9rem 1.1rem;
+    min-height: 128px;
 }}
-[data-baseweb="select"] > div:focus-within {{ border-color: {NBA_BLUE}; }}
-[data-testid="stRadio"] label {{ font-family: {FONT}; font-size: 1.05rem; letter-spacing: 0.03em; }}
-
-/* Info box (Page 4): dark card with blue left border */
-[data-testid="stAlertContainer"] {{
-    background-color: {SURFACE} !important;
-    border-left: 4px solid {NBA_BLUE} !important;
-    color: {TEXT_PRIMARY} !important;
-    border-radius: 4px;
+[data-testid="stMetricLabel"] p, .risk-card .sub-label {{
+    font-family: {BODY_FONT};
+    font-weight: 500 !important;
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: {QUICK_SILVER} !important;
 }}
+[data-testid="stMetricValue"], .risk-card .value {{
+    font-family: {HEADING_FONT};
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 1.15;
+    color: {DARK_BLUE};
+}}
+[data-testid="stMetricDelta"] {{ font-size: 12px; }}
+/* Delta colors: up (higher risk) = scarlet, down = navy */
+[data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Up"]),
+[data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Up"]) * {{ color: {SCARLET} !important; fill: {SCARLET} !important; }}
+[data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Down"]),
+[data-testid="stMetricDelta"]:has([data-testid="stMetricDeltaIcon-Down"]) * {{ color: {NAVY} !important; fill: {NAVY} !important; }}
+.risk-card .tier-line {{
+    font-family: {HEADING_FONT};
+    font-weight: 700;
+    font-size: 15px;
+    text-transform: uppercase;
+    color: {DARK_BLUE};
+}}
+.risk-card .dot {{
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    margin-right: 6px; vertical-align: middle;
+}}
+.risk-card .delta {{ font-family: {BODY_FONT}; font-size: 12px; font-weight: 500; }}
 
-/* Tier badges */
-.tier-badge {{
+/* ---- Tier chips (nba.com "NEW"/"LIVE" style: sharp corners) -------------- */
+.tier-chip {{
     display: inline-block;
-    padding: 0.2rem 0.75rem;
-    border-radius: 3px;
-    font-family: {FONT};
+    padding: 0.15rem 0.6rem;
+    border-radius: 0;
+    font-family: {HEADING_FONT};
     font-weight: 700;
-    font-size: 1.1rem;
-    letter-spacing: 0.08em;
+    font-size: 16px;
     text-transform: uppercase;
+    margin-top: 0.4rem;
+}}
+
+/* ---- Tables (header colors come from config.toml) ------------------------ */
+[data-testid="stDataFrame"] {{
+    background: {WHITE};
+    border: 1px solid {CONCRETE};
+}}
+
+/* ---- Charts: white card with a subtle shadow ----------------------------- */
+[data-testid="stVegaLiteChart"] {{
+    background: {WHITE};
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}}
+[data-testid="stImage"] img {{ box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }}
+
+/* ---- Inputs: white surface, navy focus ---------------------------------- */
+[data-baseweb="select"] > div {{
+    background-color: {WHITE};
+    border-color: {CONCRETE};
+    border-radius: 0;
+}}
+[data-baseweb="select"] > div:focus-within {{ border-color: {NAVY}; }}
+
+/* ---- Buttons / pills: sharp, navy fill, white uppercase text ------------- */
+.stButton > button, [data-testid="stBaseButton-secondary"], [data-testid="stBaseButton-primary"] {{
+    background: {NAVY};
+    color: {WHITE};
+    border: none;
+    border-radius: 0;
+    font-family: {BODY_FONT};
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}}
+
+/* ---- Expander ------------------------------------------------------------ */
+[data-testid="stExpander"] details {{ background: {WHITE}; border: 1px solid {CONCRETE}; border-radius: 0; }}
+
+/* ---- Info box (Page 4): white card, navy left border --------------------- */
+[data-testid="stAlertContainer"] {{
+    background-color: {WHITE} !important;
+    border-left: 3px solid {NAVY} !important;
+    border-radius: 0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    color: {MINOTAUR} !important;
+}}
+[data-testid="stAlertContainer"] p {{ font-family: {BODY_FONT}; font-size: 14px; color: {MINOTAUR}; }}
+/* The opening bold sentence acts as the box title */
+[data-testid="stAlertContainer"] p > strong:first-child {{
+    display: block;
+    font-family: {HEADING_FONT};
+    font-weight: 700;
+    font-size: 20px;
+    text-transform: uppercase;
+    color: {DARK_BLUE};
+    margin-bottom: 0.3rem;
 }}
 </style>
 """
 
-# Text wordmark (not the official logo): three letter tiles in the brand
-# colors, plus the project name.
-LOGO_SVG = f"""
-<svg width="210" height="54" viewBox="0 0 210 54" xmlns="http://www.w3.org/2000/svg" role="img"
-     aria-label="NBA Injury Risk wordmark">
-  <rect x="0"  y="4" width="40" height="46" rx="3" fill="{NBA_RED}"/>
-  <rect x="44" y="4" width="40" height="46" rx="3" fill="{TEXT_PRIMARY}"/>
-  <rect x="88" y="4" width="40" height="46" rx="3" fill="{NBA_BLUE}"/>
-  <g font-family="Barlow Condensed, Inter, sans-serif" font-weight="700" font-size="36" text-anchor="middle">
-    <text x="20"  y="40" fill="{TEXT_PRIMARY}">N</text>
-    <text x="64"  y="40" fill="{BACKGROUND}">B</text>
-    <text x="108" y="40" fill="{TEXT_PRIMARY}">A</text>
-  </g>
-  <g font-family="Barlow Condensed, Inter, sans-serif" font-weight="700" font-size="15" letter-spacing="1.5">
-    <text x="136" y="24" fill="{TEXT_PRIMARY}">INJURY</text>
-    <text x="136" y="44" fill="{TEXT_SECONDARY}">RISK</text>
-  </g>
-</svg>
+# Nav strip: text wordmark (not the official logo) + product name.
+NAV_STRIP = """
+<div class="nav-strip">
+  <div class="wordmark"><span class="n">N</span><span class="b">B</span><span class="a">A</span></div>
+  <div class="product">Injury Risk</div>
+</div>
 """
 
 
@@ -274,34 +378,52 @@ def inject_css() -> None:
     st.markdown(CSS, unsafe_allow_html=True)
 
 
-def render_banner(page: str) -> None:
-    """Header banner shown at the top of every page."""
+def page_header(title: str, subtitle: str) -> None:
+    """nba.com STATS-style page header: big uppercase title with a scarlet
+    underline under the first word, muted subtitle below."""
+    first, _, rest = title.partition(" ")
     st.markdown(
-        f'<div class="nba-banner"><span>NBA Injury Risk Model</span><small>{page}</small></div>',
+        f'<div class="page-header"><div class="title"><span class="accent">{first}</span> {rest}</div>'
+        f'<div class="subtitle">{subtitle}</div></div>',
         unsafe_allow_html=True,
     )
 
 
-def tier_badge(tier: str) -> str:
-    """HTML badge in the exact tier color (st.badge only has preset colors)."""
-    return (f'<span class="tier-badge" style="background:{TIER_COLORS[tier]};'
+def tier_chip(tier: str) -> str:
+    """Sharp-cornered chip in the tier color (nba.com "NEW"/"LIVE" style)."""
+    return (f'<span class="tier-chip" style="background:{TIER_COLORS[tier]};'
             f'color:{TIER_TEXT_COLORS[tier]}">{tier}</span>')
 
 
+def risk_card(risk: float, relative: float, tier: str, as_of: pd.Timestamp) -> str:
+    """Big risk number with label, tier dot and vs-average line."""
+    delta_color = SCARLET if relative >= 1 else NAVY
+    return f"""
+<div class="risk-card" title="As of {as_of:%b %d, %Y}, his most recent game in the period.">
+  <div class="sub-label">Injury risk</div>
+  <div class="value">{risk:.1%}</div>
+  <div class="tier-line"><span class="dot" style="background:{TIER_COLORS[tier]}"></span>{tier} tier</div>
+  <div class="delta" style="color:{delta_color}">{relative - 1:+.0%} vs average player</div>
+</div>
+"""
+
+
 def style_chart(chart: alt.TopLevelMixin) -> alt.TopLevelMixin:
-    """Apply the NBA dark palette to an Altair chart.
+    """Apply the nba.com light palette to an Altair chart.
 
     Charts are drawn with theme=None in st.altair_chart, so Streamlit's
     own chart theme doesn't override these settings.
     """
     return (
-        chart.configure(background=SURFACE, font=FONT, padding=12)
+        chart.configure(background=WHITE, font="Roboto", padding=14)
         .configure_view(stroke=None)
         .configure_axis(
-            gridColor=SURFACE_BORDER, domainColor=SURFACE_BORDER, tickColor=SURFACE_BORDER,
-            labelColor=TEXT_SECONDARY, titleColor=TEXT_SECONDARY, labelFontSize=12, titleFontSize=12,
+            gridColor=CONCRETE, domainColor=CONCRETE, tickColor=CONCRETE,
+            labelColor=QUICK_SILVER, titleColor=QUICK_SILVER, labelFont="Roboto", titleFont="Roboto",
+            labelFontSize=12, titleFontSize=12, titleFontWeight=500,
         )
-        .configure_legend(orient="top", labelColor=TEXT_SECONDARY, titleColor=TEXT_SECONDARY, labelFontSize=12)
+        .configure_legend(orient="top", labelColor=MINOTAUR, labelFont="Roboto", labelFontSize=12,
+                          titleColor=QUICK_SILVER)
     )
 
 
@@ -309,8 +431,8 @@ def style_chart(chart: alt.TopLevelMixin) -> alt.TopLevelMixin:
 # Page 1: Player Risk Monitor
 # ---------------------------------------------------------------------------
 def page_player(df: pd.DataFrame, metrics: dict) -> None:
-    st.title("Player Risk Monitor")
-    st.caption("Risk = probability of picking up an injury that keeps the player out of the team's next game.")
+    page_header("Player Risk Monitor",
+                "Risk = probability of picking up an injury that keeps the player out of the team's next game.")
 
     latest = latest_per_player(df).sort_values("PLAYER_NAME")
     # Plain "Name (TEAM)" labels mapped back to IDs. The team in the label
@@ -329,16 +451,14 @@ def page_player(df: pd.DataFrame, metrics: dict) -> None:
 
     # -- Headline numbers -------------------------------------------------------
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric(
-        "Current risk",
-        f"{current['RISK']:.1%}",
-        delta=f"{current['RELATIVE_RISK'] - 1:+.0%} vs average player",
-        delta_color="inverse",  # higher risk = red arrow
-        help=f"As of {current['GAME_DATE']:%b %d, %Y}, his most recent game in the period.",
-    )
+    with col1:
+        st.markdown(risk_card(current["RISK"], current["RELATIVE_RISK"], current["TIER"], current["GAME_DATE"]),
+                    unsafe_allow_html=True)
     with col2:
-        st.markdown("**Risk tier**")
-        st.markdown(tier_badge(current["TIER"]), unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="risk-card"><div class="sub-label">Risk tier</div>{tier_chip(current["TIER"])}</div>',
+            unsafe_allow_html=True,
+        )
     col3.metric("Games in period", len(games))
     col4.metric("Back-to-backs played", int(games["IS_BACK_TO_BACK"].sum()))
 
@@ -355,13 +475,13 @@ def page_player(df: pd.DataFrame, metrics: dict) -> None:
         alt.Tooltip("MIN_LAST_7D:Q", title="Minutes, last 7 days"),
         alt.Tooltip("OUTCOME:N", title="Outcome"),
     ]
-    line = base.mark_line(color=LINE_COLOR, strokeWidth=2).encode(
+    line = base.mark_line(color=LINE_COLOR, strokeWidth=2.5).encode(
         y=alt.Y("RISK:Q", title="Injury risk", axis=alt.Axis(format=".1%"), scale=alt.Scale(zero=False))
     )
     # Invisible wide points: a big hover target on every game.
     hover = base.mark_point(size=150, opacity=0).encode(y="RISK:Q", tooltip=tooltip)
 
-    # Back-to-backs (red dots) and injuries (black crosses) share one legend.
+    # Back-to-backs (scarlet dots) and injuries (black crosses) share one legend.
     marker_scale = alt.Scale(domain=["Back-to-back", "Injured after this game"],
                              range=[BACK_TO_BACK_COLOR, INJURY_MARK_COLOR])
     b2b = (
@@ -376,13 +496,12 @@ def page_player(df: pd.DataFrame, metrics: dict) -> None:
         .encode(x="GAME_DATE:T", y="RISK:Q", color=alt.Color("MARK:N", scale=marker_scale, title=None),
                 tooltip=tooltip)
     )
-    # Tier lines: gray, so they don't compete with the red back-to-back dots.
+    # Tier lines: light dashed rules with muted labels.
     guides = pd.DataFrame({"RISK": [cutoffs["orange"], cutoffs["red"]],
                            "LABEL": ["Elevated (top 20%)", "High (top 5%)"]})
-    guide_rules = alt.Chart(guides).mark_rule(strokeDash=[4, 4], color=GUIDE_COLOR).encode(y="RISK:Q")
-    guide_text = alt.Chart(guides).mark_text(align="left", dx=4, dy=-6, color=TEXT_SECONDARY, fontSize=11).encode(
-        y="RISK:Q", x=alt.value(0), text="LABEL:N"
-    )
+    guide_rules = alt.Chart(guides).mark_rule(strokeDash=[4, 4], color=GUIDE_COLOR, strokeWidth=1.5).encode(y="RISK:Q")
+    guide_text = alt.Chart(guides).mark_text(align="left", dx=4, dy=-6, color=QUICK_SILVER, fontSize=11,
+                                             font="Roboto").encode(y="RISK:Q", x=alt.value(0), text="LABEL:N")
     chart = (guide_rules + guide_text + line + b2b + injuries + hover).properties(height=360)
     st.altair_chart(style_chart(chart), width="stretch", theme=None)
     st.caption("Dashed lines: risk tier thresholds. Hover any game for details.")
@@ -390,24 +509,26 @@ def page_player(df: pd.DataFrame, metrics: dict) -> None:
     # -- Last 10 games ----------------------------------------------------------
     st.subheader("Last 10 games")
     last10 = games.tail(10).iloc[::-1]
+    # Uppercase column labels, like nba.com stats tables.
     table = pd.DataFrame({
-        "Date": last10["GAME_DATE"].dt.date,
-        "Team": last10["TEAM_ABBREVIATION"],
-        "Back-to-back": last10["BACK_TO_BACK"],
-        "Rest days": last10["DAYS_SINCE_LAST_GAME"],
-        "Min, last 7 days": last10["MIN_LAST_7D"],
-        "Risk": last10["RISK"] * 100,
-        "Tier": last10["TIER"],
-        "Outcome": last10["OUTCOME"],
+        "DATE": last10["GAME_DATE"].dt.date,
+        "TEAM": last10["TEAM_ABBREVIATION"],
+        "B2B": last10["BACK_TO_BACK"],
+        "REST DAYS": last10["DAYS_SINCE_LAST_GAME"],
+        "MIN L7D": last10["MIN_LAST_7D"],
+        "RISK": last10["RISK"] * 100,
+        "TIER": last10["TIER"],
+        "OUTCOME": last10["OUTCOME"],
     })
     st.dataframe(
         table,
         hide_index=True,
         width="stretch",
         column_config={
-            "Risk": st.column_config.NumberColumn(format="%.1f%%"),
-            "Rest days": st.column_config.NumberColumn(format="%d"),
-            "Min, last 7 days": st.column_config.NumberColumn(format="%d"),
+            "B2B": st.column_config.TextColumn(help="Back-to-back: played the day before"),
+            "RISK": st.column_config.NumberColumn(format="%.1f%%"),
+            "REST DAYS": st.column_config.NumberColumn(format="%d"),
+            "MIN L7D": st.column_config.NumberColumn(format="%d", help="Minutes played in the previous 7 days"),
         },
     )
 
@@ -416,7 +537,7 @@ def page_player(df: pd.DataFrame, metrics: dict) -> None:
 # Page 2: Team Risk Overview
 # ---------------------------------------------------------------------------
 def page_team(df: pd.DataFrame, metrics: dict) -> None:
-    st.title("Team Risk Overview")
+    page_header("Team Risk Overview", "Every player on the roster, ranked by current injury risk.")
 
     latest = latest_per_player(df)
     teams = sorted(latest["TEAM_ABBREVIATION"].dropna().unique())
@@ -436,10 +557,11 @@ def page_team(df: pd.DataFrame, metrics: dict) -> None:
 
     bars = (
         alt.Chart(roster)
-        .mark_bar(cornerRadiusEnd=4, height={"band": 0.7})
+        .mark_bar(height={"band": 0.7})
         .encode(
             x=alt.X("RISK:Q", title="Current injury risk", axis=alt.Axis(format=".1%")),
-            y=alt.Y("PLAYER_NAME:N", sort="-x", title=None),
+            y=alt.Y("PLAYER_NAME:N", sort="-x", title=None,
+                    axis=alt.Axis(labelColor=NAVY, labelFontWeight=500, labelFontSize=12)),
             color=alt.Color("TIER:N", title="Risk tier",
                             scale=alt.Scale(domain=TIER_ORDER, range=[TIER_COLORS[t] for t in TIER_ORDER])),
             tooltip=[
@@ -452,8 +574,8 @@ def page_team(df: pd.DataFrame, metrics: dict) -> None:
             ],
         )
     )
-    labels = bars.mark_text(align="left", dx=4, fontSize=12).encode(
-        text=alt.Text("RISK:Q", format=".1%"), color=alt.value(TEXT_SECONDARY)
+    labels = bars.mark_text(align="left", dx=4, fontSize=12, font="Roboto").encode(
+        text=alt.Text("RISK:Q", format=".1%"), color=alt.value(MINOTAUR)
     )
     height = max(220, 28 * len(roster))
     st.altair_chart(style_chart((bars + labels).properties(height=height)), width="stretch", theme=None)
@@ -464,27 +586,30 @@ def page_team(df: pd.DataFrame, metrics: dict) -> None:
         "High = riskiest 5%, Elevated = next 15%."
     )
     with st.expander("Details table"):
-        st.dataframe(
-            pd.DataFrame({
-                "Player": roster["PLAYER_NAME"],
-                "As of": roster["GAME_DATE"].dt.date,
-                "Risk": roster["RISK"] * 100,
-                "Tier": roster["TIER"],
-                "Age": roster["AGE"],
-                "Min, last 28 days": roster["MIN_LAST_28D"],
-            }),
-            hide_index=True,
-            width="stretch",
-            column_config={"Risk": st.column_config.NumberColumn(format="%.1f%%")},
+        details = pd.DataFrame({
+            "PLAYER": roster["PLAYER_NAME"],
+            "AS OF": roster["GAME_DATE"].dt.date,
+            "RISK": roster["RISK"] * 100,
+            "TIER": roster["TIER"],
+            "AGE": roster["AGE"],
+            "MIN L28D": roster["MIN_LAST_28D"],
+        })
+        # Player names in navy, like nba.com player links. A pandas Styler is
+        # the only way to color text inside Streamlit's canvas table, and it
+        # formats the numbers too.
+        styled = (
+            details.style
+            .map(lambda _: f"color: {NAVY}; font-weight: 500", subset=["PLAYER"])
+            .format({"RISK": "{:.1f}%", "AGE": "{:.0f}", "MIN L28D": "{:.0f}"})
         )
+        st.dataframe(styled, hide_index=True, width="stretch")
 
 
 # ---------------------------------------------------------------------------
 # Page 3: Feature Importance
 # ---------------------------------------------------------------------------
 def page_importance(metrics: dict) -> None:
-    st.title("Feature Importance")
-    st.caption("A briefing on what drives the risk score, and how much to trust the number.")
+    page_header("Feature Importance", "A briefing on what drives the risk score, and how much to trust the number.")
 
     st.subheader("What drives a player's risk score")
     if IMPORTANCE_PNG.exists():
@@ -536,24 +661,24 @@ games it calls "3% risk" end in injury about 3% of the time.
 # Page 4: Model Performance
 # ---------------------------------------------------------------------------
 def page_performance(metrics: dict) -> None:
-    st.title("Model Performance")
     m, ci = metrics["metrics"], metrics["confidence_intervals"]
-    st.caption(
+    page_header(
+        "Model Performance",
         f"Test period {metrics['test_period'][0]} to {metrics['test_period'][1]}: "
         f"{metrics['n_test']:,} player-games, {metrics['n_test_injuries']} injuries "
-        f"({metrics['test_base_rate']:.1%} base rate). Models never saw this period during training."
+        f"({metrics['test_base_rate']:.1%} base rate). Models never saw this period during training.",
     )
 
     names = {"Baseline": "Baseline (minutes only)", "Logistic": "Logistic regression", "XGBoost": "XGBoost"}
     table = pd.DataFrame([
         {
-            "Model": names[key],
+            "MODEL": names[key],
             "ROC-AUC": m[key]["ROC_AUC"],
             "PR-AUC": m[key]["PR_AUC"],
             "PR-AUC 95% CI": ci[key]["PR_AUC_95CI"],
-            "Lift @ top 5%": m[key]["LIFT_TOP5"],
-            "Precision @ top 5%": m[key]["PRECISION_TOP5"] * 100,
-            "Recall @ top 5%": m[key]["RECALL_TOP5"] * 100,
+            "LIFT @ TOP 5%": m[key]["LIFT_TOP5"],
+            "PRECISION @ TOP 5%": m[key]["PRECISION_TOP5"] * 100,
+            "RECALL @ TOP 5%": m[key]["RECALL_TOP5"] * 100,
         }
         for key in names
     ])
@@ -565,11 +690,11 @@ def page_performance(metrics: dict) -> None:
             "ROC-AUC": st.column_config.NumberColumn(format="%.3f", help="0.5 = coin flip, 1.0 = perfect"),
             "PR-AUC": st.column_config.NumberColumn(
                 format="%.3f", help=f"Main metric. Random guessing scores the base rate ({metrics['test_base_rate']:.3f})."),
-            "Lift @ top 5%": st.column_config.NumberColumn(
+            "LIFT @ TOP 5%": st.column_config.NumberColumn(
                 format="%.2f×", help="How many times more injuries than random among the 5% of games flagged riskiest."),
-            "Precision @ top 5%": st.column_config.NumberColumn(
+            "PRECISION @ TOP 5%": st.column_config.NumberColumn(
                 format="%.1f%%", help="Of the flagged games, share followed by an injury."),
-            "Recall @ top 5%": st.column_config.NumberColumn(
+            "RECALL @ TOP 5%": st.column_config.NumberColumn(
                 format="%.1f%%", help="Of all injuries, share that were flagged."),
         },
     )
@@ -605,12 +730,12 @@ Every model finds injuries only about **1.4 times better than chance**. Public d
     tiers = metrics["risk_tiers"]
     st.dataframe(
         pd.DataFrame({
-            "Tier": [TIER_LABELS[t] for t in ("red", "orange", "green")],
-            "Games": [tiers["n_games"][t] for t in ("red", "orange", "green")],
-            "Injury rate after the game": [tiers["observed_injury_rate"][t] * 100 for t in ("red", "orange", "green")],
+            "TIER": [TIER_LABELS[t] for t in ("red", "orange", "green")],
+            "GAMES": [tiers["n_games"][t] for t in ("red", "orange", "green")],
+            "INJURY RATE AFTER THE GAME": [tiers["observed_injury_rate"][t] * 100 for t in ("red", "orange", "green")],
         }),
         hide_index=True,
-        column_config={"Injury rate after the game": st.column_config.NumberColumn(format="%.1f%%")},
+        column_config={"INJURY RATE AFTER THE GAME": st.column_config.NumberColumn(format="%.1f%%")},
     )
     st.caption("High- and Elevated-tier games were followed by an injury about 1.6× as often as Low-tier games.")
 
@@ -622,14 +747,14 @@ def main() -> None:
     st.set_page_config(page_title="NBA Injury Risk", page_icon=":material/monitor_heart:", layout="wide")
     inject_css()
 
-    st.sidebar.markdown(LOGO_SVG, unsafe_allow_html=True)
+    st.sidebar.markdown(NAV_STRIP, unsafe_allow_html=True)
+    st.sidebar.markdown('<div class="sb-label">Pages</div>', unsafe_allow_html=True)
     page = st.sidebar.radio("Page", PAGES, label_visibility="collapsed")
     st.sidebar.divider()
+    st.sidebar.markdown('<div class="sb-label">About the data</div>', unsafe_allow_html=True)
     st.sidebar.caption(SIDEBAR_NOTE)
     st.sidebar.caption("Risk = XGBoost probability of an injury that keeps the player out of the team's next game.")
     st.sidebar.caption("Unofficial portfolio project. Not affiliated with or endorsed by the NBA.")
-
-    render_banner(page)
 
     try:
         df, metrics = load_data()
