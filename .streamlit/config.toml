@@ -1,0 +1,24 @@
+# Streamlit theme: NBA-inspired dark palette.
+#
+# Why a config file in addition to the CSS in dashboard/app.py:
+# Streamlit draws dataframes on a <canvas>, which CSS can't reach. The header
+# row color, borders and the color of focused or selected widgets come from
+# these theme settings. The CSS handles everything else (banner, cards,
+# sidebar border, alert box).
+#
+# Streamlit reads this file from the folder you launch it in, so run the app
+# from the repository root:  streamlit run dashboard/app.py
+
+[theme]
+base = "dark"
+primaryColor = "#1D428A"              # NBA blue: focus borders, selected radio, sliders
+backgroundColor = "#0A0A0A"           # app background
+secondaryBackgroundColor = "#1A1A1A"  # cards, inputs, widget surfaces
+textColor = "#FFFFFF"
+borderColor = "#2A2A2A"
+dataframeHeaderBackgroundColor = "#14264B"  # subtle blue: NBA blue blended into the dark surface
+font = "Barlow Condensed:https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&display=swap, Inter, sans-serif"
+
+[theme.sidebar]
+backgroundColor = "#111111"
+secondaryBackgroundColor = "#1A1A1A"

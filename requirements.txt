@@ -1,10 +1,26 @@
-nba_api
-pandas
-numpy
-scikit-learn
-xgboost
+# NBA Injury Risk Model - Python dependencies
+# Install with:  pip install -r requirements.txt
+# Tested with Python 3.14.
+#
+# Versions use ">=tested,<next-major": you get bug fixes but not breaking
+# major releases. Packages for later steps are unpinned until those steps
+# are built and tested.
+
+# --- Step 1: data collection (src/data_collection.py) ----------------------
+nba_api>=1.12.0,<2        # Python client for the stats.nba.com endpoints
+pandas>=3.1.0,<4          # tabular data handling and CSV I/O
+numpy>=2.5.0,<3           # numeric backend for pandas
+requests>=2.34.0,<3       # HTTP layer used by nba_api; imported directly for its exception types
+
+# --- Step 4: modeling (src/modeling.py) -------------------------------------
+scikit-learn>=1.9.0,<2    # logistic regression, pipelines, metrics, calibration curves
+xgboost>=3.4.0,<4         # gradient-boosted trees; SHAP values via its built-in TreeSHAP
+                          # macOS: needs the OpenMP runtime -> `brew install libomp`
+joblib>=1.6.0             # saving trained models (.pkl)
+matplotlib>=3.11.0,<4     # feature importance and calibration plots
+
+# --- Later steps (notebooks, dashboard) -------------------------------------
 streamlit
 plotly
-matplotlib
 seaborn
 jupyter
