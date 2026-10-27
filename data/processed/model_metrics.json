@@ -1,0 +1,94 @@
+{
+  "train_period": [
+    "2022-10-18",
+    "2023-02-05"
+  ],
+  "test_period": [
+    "2023-02-13",
+    "2023-04-09"
+  ],
+  "n_test": 7775,
+  "n_test_injuries": 261,
+  "train_base_rate": 0.024919188950925653,
+  "test_base_rate": 0.03356913183279743,
+  "metrics": {
+    "Baseline": {
+      "ROC_AUC": 0.608640626896205,
+      "PR_AUC": 0.04856982402265951,
+      "PRECISION_TOP5": 0.04884318766066838,
+      "RECALL_TOP5": 0.07279693486590039,
+      "LIFT_TOP5": 1.455003004067803,
+      "BRIER": 0.24345173787534086,
+      "ECE": 0.45472923999045206,
+      "MEAN_PRED": 0.4882983718232495,
+      "BRIER_CORRECTED": 0.03238800343188109,
+      "ECE_CORRECTED": 0.010024942704616875,
+      "MEAN_PRED_CORRECTED": 0.024918023043679946
+    },
+    "Logistic": {
+      "ROC_AUC": 0.5967323320861084,
+      "PR_AUC": 0.04451664428434843,
+      "PRECISION_TOP5": 0.04627249357326478,
+      "RECALL_TOP5": 0.06896551724137931,
+      "LIFT_TOP5": 1.3784238985905504,
+      "BRIER": 0.14202982377054352,
+      "ECE": 0.31280352808914386,
+      "MEAN_PRED": 0.3463726599219413,
+      "BRIER_CORRECTED": 0.03271077960763302,
+      "ECE_CORRECTED": 0.01875338621799819,
+      "MEAN_PRED_CORRECTED": 0.014815745614799238
+    },
+    "XGBoost": {
+      "ROC_AUC": 0.5988203884039702,
+      "PR_AUC": 0.044096021032492216,
+      "PRECISION_TOP5": 0.04627249357326478,
+      "RECALL_TOP5": 0.06896551724137931,
+      "LIFT_TOP5": 1.3784238985905504,
+      "BRIER": 0.20723962783813477,
+      "ECE": 0.4157605422003093,
+      "MEAN_PRED": 0.449329674243927,
+      "BRIER_CORRECTED": 0.0325259231030941,
+      "ECE_CORRECTED": 0.012688630088397157,
+      "MEAN_PRED_CORRECTED": 0.020880499854683876
+    }
+  },
+  "confidence_intervals": {
+    "Baseline": {
+      "PR_AUC_95CI": "[0.040, 0.062]",
+      "ROC_AUC_95CI": "[0.574, 0.651]",
+      "PR_AUC_GAIN_VS_BASELINE_95CI": "-"
+    },
+    "Logistic": {
+      "PR_AUC_95CI": "[0.037, 0.055]",
+      "ROC_AUC_95CI": "[0.560, 0.634]",
+      "PR_AUC_GAIN_VS_BASELINE_95CI": "[-0.016, +0.003]"
+    },
+    "XGBoost": {
+      "PR_AUC_95CI": "[0.037, 0.053]",
+      "ROC_AUC_95CI": "[0.560, 0.638]",
+      "PR_AUC_GAIN_VS_BASELINE_95CI": "[-0.016, +0.002]"
+    }
+  },
+  "risk_tiers": {
+    "model": "XGBoost (corrected probability)",
+    "basis": "percentiles of the displayed (test) period's predictions; display only",
+    "percentiles": {
+      "orange": 0.8,
+      "red": 0.95
+    },
+    "cutoffs": {
+      "orange": 0.025412464514374733,
+      "red": 0.02852805145084858
+    },
+    "observed_injury_rate": {
+      "green": 0.030234802187198456,
+      "orange": 0.04627249357326478,
+      "red": 0.04871794871794872
+    },
+    "n_games": {
+      "green": 6218,
+      "orange": 1167,
+      "red": 390
+    }
+  }
+}

@@ -221,7 +221,11 @@ __marimo__/
 
 venv/
 data/raw/
-data/processed/
+data/processed/*
+# Exception: the 3 small files the Streamlit dashboard reads (needed for Streamlit Cloud)
+!data/processed/test_predictions.csv
+!data/processed/model_features.csv
+!data/processed/model_metrics.json
 models/*.pkl
 
 # macOS Finder metadata
