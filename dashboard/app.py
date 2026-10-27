@@ -95,6 +95,20 @@ CONTEXT_COLUMNS = [
 ]
 
 PAGES = ["Player Risk Monitor", "Team Risk Overview", "Feature Importance", "Model Performance"]
+# Numbers shown before each page in the sidebar index.
+SECTION_NUMBERS = {page: f"{i:02d}" for i, page in enumerate(PAGES, start=1)}
+
+# Sidebar-only palette and fonts ("The Injury Report" printed-report style).
+# Dark version: same navy as the table headers (DARK_BLUE), light text.
+SB_PAPER = DARK_BLUE   # #0b1b2c, matches the stats-table header row
+SB_INK = "#FFFFFF"     # main text (white)
+SB_MUTED = "#A9B4C2"   # labels and notes (~8:1 contrast on the navy)
+SB_RULE = "#24364A"    # hairline rules, a step lighter than the background
+SB_ACCENT = "#6F8FC9"  # progress line: NBA navy lightened so it shows on dark
+SB_TICK = SCARLET      # masthead bar and current-page tick: the one red accent
+SB_DISPLAY_FONT = "'Barlow Condensed', 'Arial Narrow', sans-serif"
+SB_MONO_FONT = "'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace"
+SB_SERIF_FONT = "'Source Serif 4', Georgia, serif"
 
 
 # ---------------------------------------------------------------------------
@@ -139,7 +153,9 @@ def latest_per_player(df: pd.DataFrame) -> pd.DataFrame:
 # inline/emotion styles that would otherwise win.
 CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Barlow+Condensed:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Barlow+Condensed:wght@600;700;800&display=swap');
+/* Sidebar-only fonts: IBM Plex Mono (index) and Source Serif 4 (notes) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap');
 
 /* ---- Base ---------------------------------------------------------------- */
 .stApp {{ background-color: {COTTON}; }}
@@ -171,64 +187,67 @@ h3 {{ font-size: 18px !important; padding-top: 0.5rem !important; }}
     color: {QUICK_SILVER} !important;
 }}
 
-/* ---- Sidebar ------------------------------------------------------------- */
+/* ---- Sidebar: "The Injury Report" style ----------------------------------
+   Dark navy (same as the table headers), masthead, numbered index on a
+   thin progress line, serif notes. Every rule is scoped to the sidebar so the
+   main page keeps its nba.com style. */
 [data-testid="stSidebar"] {{
-    background-color: {WHITE};
-    border-left: 3px solid {NAVY};
-    border-right: 1px solid {CONCRETE};
+    background-color: {SB_PAPER};
+    border-right: 1px solid {SB_RULE};
 }}
-.sb-label {{
-    font-family: {BODY_FONT};
-    font-weight: 500;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: {QUICK_SILVER};
-    margin: 0.6rem 0 0.3rem;
+[data-testid="stSidebar"] hr {{ border-top: 1px solid {SB_RULE} !important; margin: 2rem 0 !important; }}
+[data-testid="stSidebar"] .masthead {{
+    border-top: 4px solid {SB_TICK};
+    border-bottom: 1px solid {SB_RULE};
+    padding: 0.8rem 0 0.9rem;
+    margin-bottom: 1.2rem;
 }}
-/* Nav items: Roboto 500 uppercase; selected = navy text with a left tick.
-   :has() only matches the checked item, so unselected items stay as-is. */
-[data-testid="stSidebar"] [data-testid="stRadio"] label {{
-    padding: 0.35rem 0.6rem;
-    border-left: 3px solid transparent;
-    margin-bottom: 2px;
-}}
-[data-testid="stSidebar"] [data-testid="stRadio"] label p {{
-    font-family: {BODY_FONT};
-    font-weight: 500;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: {MINOTAUR};
-}}
-[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {{
-    border-left-color: {NAVY};
-    background: {COTTON};
-}}
-[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) p {{ color: {NAVY}; }}
-
-/* Black nav strip with the wordmark, at the top of the sidebar */
-.nav-strip {{
-    background: {BLACK};
-    margin: -1rem -1rem 1rem -1rem;
-    padding: 1rem 1.2rem 0.9rem;
-}}
-.nav-strip .wordmark {{
-    font-family: {HEADING_FONT};
-    font-weight: 700;
-    font-size: 44px;
+[data-testid="stSidebar"] .masthead .title {{
+    font-family: {SB_DISPLAY_FONT};
+    font-weight: 800;
+    font-size: 30px;
     line-height: 1;
-}}
-.nav-strip .wordmark .n {{ color: {SCARLET}; }}
-.nav-strip .wordmark .b {{ color: {WHITE}; }}
-.nav-strip .wordmark .a {{ color: {NAVY}; }}
-.nav-strip .product {{
-    font-family: {HEADING_FONT};
-    font-weight: 700;
-    font-size: 18px;
     text-transform: uppercase;
-    color: {NAVY};
-    margin-top: 2px;
+    color: {SB_INK};
+}}
+[data-testid="stSidebar"] .masthead .sub {{
+    font-family: {SB_MONO_FONT};
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: {SB_MUTED};
+    margin-top: 0.4rem;
+}}
+[data-testid="stSidebar"] .index-label {{
+    font-family: {SB_MONO_FONT};
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: {SB_MUTED};
+    margin-bottom: 0.4rem;
+}}
+/* Each index entry sits on a thin vertical line. Entries before the current
+   one turn navy (progress); the current one gets a heavier navy tick. */
+[data-testid="stSidebar"] [role="radiogroup"] {{ gap: 0; }}
+[data-testid="stSidebar"] [role="radiogroup"] label {{
+    border-left: 2px solid {SB_RULE};
+    padding: 0.45rem 0 0.45rem 0.75rem;
+    margin: 0;
+}}
+[data-testid="stSidebar"] [role="radiogroup"] label p {{
+    font-family: {SB_MONO_FONT};
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    color: {SB_MUTED};
+}}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(~ label input:checked) {{ border-left-color: {SB_ACCENT}; }}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {{ border-left: 4px solid {SB_TICK}; }}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p {{ color: {SB_INK}; font-weight: 600; }}
+[data-testid="stSidebar"] p.side-note {{
+    font-family: {SB_SERIF_FONT};
+    font-size: 13px;
+    line-height: 1.5;
+    color: {SB_MUTED};
 }}
 
 /* ---- Page header (nba.com STATS-section style) --------------------------- */
@@ -365,13 +384,11 @@ h3 {{ font-size: 18px !important; padding-top: 0.5rem !important; }}
 </style>
 """
 
-# Nav strip: text wordmark (not the official logo) + product name.
-NAV_STRIP = """
-<div class="nav-strip">
-  <div class="wordmark"><span class="n">N</span><span class="b">B</span><span class="a">A</span></div>
-  <div class="product">Injury Risk</div>
-</div>
-"""
+# Sidebar masthead (text only, no logo).
+MASTHEAD = (
+    '<div class="masthead"><div class="title">The Injury Report</div>'
+    '<div class="sub">NBA injury risk model · 2022-23</div></div>'
+)
 
 
 def inject_css() -> None:
@@ -747,14 +764,19 @@ def main() -> None:
     st.set_page_config(page_title="NBA Injury Risk", page_icon=":material/monitor_heart:", layout="wide")
     inject_css()
 
-    st.sidebar.markdown(NAV_STRIP, unsafe_allow_html=True)
-    st.sidebar.markdown('<div class="sb-label">Pages</div>', unsafe_allow_html=True)
-    page = st.sidebar.radio("Page", PAGES, label_visibility="collapsed")
-    st.sidebar.divider()
-    st.sidebar.markdown('<div class="sb-label">About the data</div>', unsafe_allow_html=True)
-    st.sidebar.caption(SIDEBAR_NOTE)
-    st.sidebar.caption("Risk = XGBoost probability of an injury that keeps the player out of the team's next game.")
-    st.sidebar.caption("Unofficial portfolio project. Not affiliated with or endorsed by the NBA.")
+    with st.sidebar:
+        st.markdown(MASTHEAD, unsafe_allow_html=True)
+        st.markdown('<div class="index-label">Index</div>', unsafe_allow_html=True)
+        page = st.radio("Page", PAGES, label_visibility="collapsed",
+                        format_func=lambda p: f"{SECTION_NUMBERS[p]}  {p}")
+        st.divider()
+        st.markdown(
+            f'<p class="side-note">{SIDEBAR_NOTE}</p>'
+            '<p class="side-note">Risk = XGBoost probability of an injury that keeps the player out of the '
+            "team's next game.</p>"
+            '<p class="side-note">Independent project. Not affiliated with or endorsed by the NBA.</p>',
+            unsafe_allow_html=True,
+        )
 
     try:
         df, metrics = load_data()

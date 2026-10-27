@@ -16,8 +16,15 @@ textColor = "#222222"                      # minotaur
 borderColor = "#e7e7e7"                    # concrete
 dataframeHeaderBackgroundColor = "#0b1b2c" # nba dark blue (stats table header)
 dataframeHeaderTextColor = "#ffffff"       # white header text (needed: default dark text is unreadable on navy)
-font = "Roboto:https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Barlow+Condensed:wght@600;700&display=swap, sans-serif"
+# One font per URL: Streamlit rejects a source URL that loads several
+# families. Barlow Condensed is loaded by the CSS in dashboard/app.py.
+font = "Roboto:https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap, sans-serif"
 
 [theme.sidebar]
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f6f6f6"
+# Dark sidebar, same navy as the table headers. Light text, and a lighter
+# blue for the radio dots so they stay visible on the dark background.
+backgroundColor = "#0b1b2c"
+secondaryBackgroundColor = "#13263B"
+textColor = "#FFFFFF"
+primaryColor = "#6F8FC9"
+borderColor = "#24364A"
